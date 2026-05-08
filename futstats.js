@@ -1,11 +1,6 @@
-/* =========================================================
-   FUTSTATS — API Integration
-   API: api-football.com via RapidAPI
-   ========================================================= */
 
-// ── STATE ──────────────────────────────────────────────────
 const STATE = {
-  apiKey: localStorage.getItem('futstats_api_key') || null,
+apiKey: localStorage.getItem('futstats_api_key') ||  '250bcdbdd795f296fcb356f2df9f05b0',
   leagueId: 71,
   season: 2024,
   standingsData: [],
@@ -13,7 +8,6 @@ const STATE = {
   liveInterval: null,
 };
 
-// ── LEAGUE CONFIG ──────────────────────────────────────────
 const LEAGUE_RULES = {
   71:  { total: 20, champion: 1, lib: 4,  sul: 6,  rel: 4 },
   72:  { total: 20, champion: 1, lib: 4,  sul: 0,  rel: 4 },
@@ -29,7 +23,7 @@ const LEAGUE_RULES = {
   61:  { total: 18, champion: 1, lib: 4,  sul: 0,  rel: 3 },
 };
 
-// ── API HELPERS ────────────────────────────────────────────
+
 async function apiFetch(endpoint, params = {}) {
   if (!STATE.apiKey) throw new Error('NO_KEY');
 
@@ -53,7 +47,7 @@ async function apiFetch(endpoint, params = {}) {
   return data;
 }
 
-// ── API KEY ────────────────────────────────────────────────
+
 function saveApiKey() {
   const key = document.getElementById('api-key-input').value.trim();
   if (!key) return;
@@ -75,7 +69,6 @@ function checkApiKey() {
   }
 }
 
-// ── LEAGUE CHANGE ──────────────────────────────────────────
 function onLeagueChange() {
   const sel = document.getElementById('league-select');
   const opt = sel.options[sel.selectedIndex];
@@ -85,7 +78,7 @@ function onLeagueChange() {
   loadAll();
 }
 
-// ── LOAD ALL ───────────────────────────────────────────────
+
 function loadAll() {
   if (!STATE.apiKey) return;
   loadStandings();
@@ -97,7 +90,7 @@ function loadAll() {
   STATE.liveInterval = setInterval(loadLiveMatches, 60000);
 }
 
-// ── STANDINGS ──────────────────────────────────────────────
+
 async function loadStandings() {
   const el = document.getElementById('standings-content');
   el.innerHTML = skeletonRows(10);
@@ -201,7 +194,6 @@ function toggleShowAll(section) {
   }
 }
 
-// ── BADGE CLASS ─────────────────────────────────────────────
 function getBadgeClass(pos, leagueId, total) {
   const rules = LEAGUE_RULES[leagueId];
 
@@ -228,7 +220,6 @@ function renderForm(form) {
   }).join('');
 }
 
-// ── SCORERS ────────────────────────────────────────────────
 async function loadScorers() {
   const el = document.getElementById('scorers-content');
   el.innerHTML = skeletonScorers(4);
@@ -281,7 +272,6 @@ async function loadScorers() {
   const el = document.getElementById('matches-content');
   el.innerHTML = emptyState('Temporada 2024 encerrada. Próximos jogos disponíveis em 2025.');
 }
-// ── LIVE MATCHES ───────────────────────────────────────────
 async function loadLiveMatches() {
   try {
     const data = await apiFetch('/fixtures', {
@@ -306,7 +296,7 @@ async function loadLiveMatches() {
       liveList.innerHTML          = fixtures.map(f => renderMatchItem(f, true)).join('');
     }
   } catch (e) {
-    // silent fail — live não é crítico
+    
   }
 }
 
@@ -356,7 +346,7 @@ function renderMatchItem(f, isLive) {
     </li>`;
 }
 
-// ── SEARCH ─────────────────────────────────────────────────
+
 function handleSearch(e) {
   e.preventDefault();
   const q = document.getElementById('search-input').value.trim();
@@ -364,7 +354,6 @@ function handleSearch(e) {
   alert(`Busca por "${q}" — funcionalidade a implementar.`);
 }
 
-// ── UTILS ──────────────────────────────────────────────────
 function formatDate(dt) {
   const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
   const d   = days[dt.getDay()];
@@ -419,8 +408,7 @@ function errorState(msg, retryFn) {
     ${retryFn && !isNoKey ? `<button class="retry-btn" onclick="${retryFn}()">Tentar novamente</button>` : ''}
   </div>`;
 }
-
-// ── INIT ───────────────────────────────────────────────────
+  
 document.getElementById('current-season').textContent = STATE.season;
 document.getElementById('scorers-season').textContent  = STATE.season;
 checkApiKey();
