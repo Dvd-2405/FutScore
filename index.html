@@ -1,0 +1,250 @@
+  <!DOCTYPE html>
+  <html lang="pt-BR">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FutStats — Estatísticas do Futebol Brasileiro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;500;600;700&family=Barlow:wght@400;500&display=swap"
+      rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css">
+  </head>
+
+  <body>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <a href="#" class="logo" aria-label="FutStats Home">
+          <span class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" />
+              <path
+                d="M12 2a10 10 0 0 1 0 20M12 2c-2.76 4.57-2.76 15.43 0 20M2 12h20M4.93 4.93c3.5 2.27 10.64 2.27 14.14 0M4.93 19.07c3.5-2.27 10.64-2.27 14.14 0" />
+            </svg>
+          </span>
+          <span class="logo-text">Fut<strong>Stats</strong></span>
+        </a>
+        <nav class="main-nav" aria-label="Navegação principal">
+          <a href="#" class="nav-link active">Início</a>
+          <a href="#" class="nav-link">Campeonatos</a>
+          <a href="#" class="nav-link">Times</a>
+          <a href="#" class="nav-link">Jogadores</a>
+        </nav>
+        <div class="header-search">
+          <form class="search-form" role="search" aria-label="Buscar times ou ligas" onsubmit="handleSearch(event)">
+            <label for="search-input" class="sr-only">Buscar times ou ligas</label>
+            <input id="search-input" type="search" class="search-input" placeholder="Buscar times ou ligas..."
+              autocomplete="off" />
+            <button type="submit" class="search-btn" aria-label="Pesquisar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+              </svg>
+            </button>
+          </form>
+        </div>
+      </div>
+    </header>
+
+    <!-- Banner API Key: aparece quando não há chave salva -->
+    <div class="api-banner" id="api-banner" style="display:none">
+      <div class="api-banner-inner">
+        <p class="api-banner-text">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 8v4M12 16h.01" />
+          </svg>
+          Cole sua chave da API-Football para carregar dados reais. Crie uma em <strong
+            style="color:#fff">api-football.com</strong> (plano gratuito disponível).
+        </p>
+        <div class="api-key-form">
+          <input type="password" id="api-key-input" class="api-key-input" placeholder="Sua API Key aqui..." />
+          <button class="api-key-btn" onclick="saveApiKey()">Salvar</button>
+        </div>
+      </div>
+    </div>
+
+    <section class="hero-strip" aria-label="Campeonato selecionado">
+      <div class="hero-inner">
+        <div class="league-selector-group">
+          <span class="league-badge" id="league-flag" aria-hidden="true">🇧🇷</span>
+          <label for="league-select" class="league-label">Campeonato</label>
+          <select id="league-select" class="league-select" aria-label="Escolha um campeonato" onchange="onLeagueChange()">
+            <optgroup label="🇧🇷 Brasil">
+              <option value="71"  data-flag="🇧🇷" data-name="Brasileirão Série A">Brasileirão Série A</option>
+              <option value="72"  data-flag="🇧🇷" data-name="Brasileirão Série B">Brasileirão Série B</option>
+              <option value="73"  data-flag="🇧🇷" data-name="Copa do Brasil">Copa do Brasil</option>
+            </optgroup>
+            <optgroup label="🌎 América do Sul">
+              <option value="13"  data-flag="🌎" data-name="Libertadores">Libertadores</option>
+              <option value="11"  data-flag="🌎" data-name="Sul-Americana">Sul-Americana</option>
+            </optgroup>
+            <optgroup label="🏆 Europa">
+              <option value="2"   data-flag="🏆" data-name="Champions League">Champions League</option>
+              <option value="3"   data-flag="🏆" data-name="Europa League">Europa League</option>
+              <option value="39"  data-flag="🏴󠁧󠁢󠁥󠁮󠁧󠁿" data-name="Premier League">Premier League</option>
+              <option value="140" data-flag="🇪🇸" data-name="La Liga">La Liga</option>
+              <option value="78"  data-flag="🇩🇪" data-name="Bundesliga">Bundesliga</option>
+              <option value="135" data-flag="🇮🇹" data-name="Serie A">Serie A (Itália)</option>
+              <option value="61"  data-flag="🇫🇷" data-name="Ligue 1">Ligue 1</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="hero-meta">
+          <span class="season-display">Temporada <span id="current-season">2025</span></span>
+          <span class="meta-pill live" id="live-indicator" style="display:none">
+            <span class="live-dot" aria-hidden="true"></span>
+            Ao Vivo
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <main class="dashboard" id="main-content">
+
+      <section class="card card--standings" aria-labelledby="standings-title">
+        <header class="card__header">
+          <div class="card__title-group">
+            <svg class="card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              aria-hidden="true">
+              <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+            </svg>
+            <h2 class="card__title" id="standings-title">Classificação</h2>
+          </div>
+          <div class="card__controls">
+            <label for="sort-select" class="sr-only">Ordenar por</label>
+            <select id="sort-select" class="sort-select" aria-label="Ordenar tabela por"
+              onchange="sortStandings(this.value)">
+              <option value="points">Pontos</option>
+              <option value="goals_for">Gols Marcados</option>
+              <option value="goal_diff">Saldo de Gols</option>
+            </select>
+          </div>
+        </header>
+
+        <div id="standings-content">
+          <div class="skeleton-wrap">
+            <div class="skeleton skeleton-table-row"></div>
+            <div class="skeleton skeleton-table-row"></div>
+            <div class="skeleton skeleton-table-row"></div>
+            <div class="skeleton skeleton-table-row"></div>
+            <div class="skeleton skeleton-table-row"></div>
+            <div class="skeleton skeleton-table-row"></div>
+            <div class="skeleton skeleton-table-row"></div>
+            <div class="skeleton skeleton-table-row"></div>
+          </div>
+        </div>
+
+        <footer class="card__footer">
+          <div class="legend">
+            <span class="legend-item"><span class="legend-dot pos--champion"></span> Campeão</span>
+            <span class="legend-item"><span class="legend-dot pos--lib"></span> Libertadores</span>
+            <span class="legend-item"><span class="legend-dot pos--sul"></span> Sul-Americana</span>
+            <span class="legend-item"><span class="legend-dot pos--rel"></span> Rebaixamento</span>
+          </div>
+          <button class="card__link" id="standings-show-all" onclick="toggleShowAll('standings')"
+            style="background:none;border:none;cursor:pointer;">Ver tabela completa →</button>
+        </footer>
+      </section>
+
+      <aside class="sidebar" aria-label="Ao Vivo, Artilheiros e Próximos Jogos">
+
+        <section class="card card--live" aria-labelledby="live-title" id="live-card" style="display:none">
+          <header class="card__header">
+            <div class="card__title-group">
+              <svg class="card__icon" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"
+                style="color:#f87171" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              <h2 class="card__title" id="live-title" style="color:#f87171">Ao Vivo</h2>
+            </div>
+            <span class="live-count-badge" id="live-count">0</span>
+          </header>
+          <ul class="matches-list" id="live-list" aria-label="Jogos ao vivo"></ul>
+        </section>
+
+        <section class="card card--scorers" aria-labelledby="scorers-title">
+          <header class="card__header">
+            <div class="card__title-group">
+              <svg class="card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                aria-hidden="true">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+              <h2 class="card__title" id="scorers-title">Artilheiros</h2>
+            </div>
+            <span class="season-badge" id="scorers-season">2025</span>
+          </header>
+          <div id="scorers-content">
+            <div class="skeleton-wrap">
+              <div class="skeleton-row">
+                <div class="skeleton skeleton-circle"></div>
+                <div class="skeleton skeleton-text-md" style="flex:1"></div>
+                <div class="skeleton skeleton-text-md" style="width:40px"></div>
+              </div>
+              <div class="skeleton-row">
+                <div class="skeleton skeleton-circle"></div>
+                <div class="skeleton skeleton-text-md" style="flex:1"></div>
+                <div class="skeleton skeleton-text-md" style="width:40px"></div>
+              </div>
+              <div class="skeleton-row">
+                <div class="skeleton skeleton-circle"></div>
+                <div class="skeleton skeleton-text-md" style="flex:1"></div>
+                <div class="skeleton skeleton-text-md" style="width:40px"></div>
+              </div>
+              <div class="skeleton-row">
+                <div class="skeleton skeleton-circle"></div>
+                <div class="skeleton skeleton-text-md" style="flex:1"></div>
+                <div class="skeleton skeleton-text-md" style="width:40px"></div>
+              </div>
+            </div>
+          </div>
+          <a href="#" class="card__link">Ver todos os artilheiros →</a>
+        </section>
+
+        <section class="card card--matches" aria-labelledby="matches-title">
+          <header class="card__header">
+            <div class="card__title-group">
+              <svg class="card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                aria-hidden="true">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+              <h2 class="card__title" id="matches-title">Próximos Jogos</h2>
+            </div>
+          </header>
+          <div id="matches-content">
+            <div class="skeleton-wrap">
+              <div class="skeleton skeleton-table-row"></div>
+              <div class="skeleton skeleton-table-row"></div>
+              <div class="skeleton skeleton-table-row"></div>
+            </div>
+          </div>
+          <a href="#" class="card__link">Ver todos os jogos →</a>
+        </section>
+
+      </aside>
+    </main>
+
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <a href="#" class="footer-logo" aria-label="FutStats Home">
+          <span class="logo-text">Fut<strong>Stats</strong></span>
+        </a>
+        <p class="footer-credit">
+          Desenvolvido por <a href="https://github.com/dvd-2405" target="_blank" rel="noopener noreferrer"
+            class="footer-link"><strong>David Vieira</strong></a>
+          <span aria-hidden="true">·</span> Projeto de Portfólio 2026
+        </p>
+      </div>
+    </footer>
+
+    <script src="futstats.js"></script>
+  </body>
+
+  </html>
