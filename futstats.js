@@ -7,7 +7,7 @@ apiKey: localStorage.getItem('futstats_api_key') ||  '250bcdbdd795f296fcb356f2df
   showAllStandings: false,
   liveInterval: null,
 };
-
+  
 const LEAGUE_RULES = {
   71:  { total: 20, champion: 1, lib: 4,  sul: 6,  rel: 4 },
   72:  { total: 20, champion: 1, lib: 4,  sul: 0,  rel: 4 },
@@ -408,7 +408,7 @@ function errorState(msg, retryFn) {
     ${retryFn && !isNoKey ? `<button class="retry-btn" onclick="${retryFn}()">Tentar novamente</button>` : ''}
   </div>`;
 }
-  
+
 document.getElementById('current-season').textContent = STATE.season;
 document.getElementById('scorers-season').textContent  = STATE.season;
 checkApiKey();
